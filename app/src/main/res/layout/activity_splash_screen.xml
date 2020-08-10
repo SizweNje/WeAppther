@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".SplashScreenActivity"
     android:layout_gravity="center_horizontal"
-    android:background="@drawable/bg_night">
+    android:background="@color/white">
 
     <ImageView
         android:layout_width="150dp"
@@ -19,9 +19,9 @@
         />
 
     <ImageView
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:src="@mipmap/ic_launcher"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:src="@drawable/appstore"
         android:layout_centerInParent="true"
 
         />

@@ -6,6 +6,7 @@
     android:id="@+id/linearLayout"
     android:padding="10dp"
     android:orientation="horizontal"
+    android:background="@drawable/bg_night_shadow"
     android:layout_margin="10dp"
     android:weightSum="1">
 
@@ -15,24 +16,11 @@
         android:id="@+id/datestamp"
         android:layout_margin="5dp"
         android:textColor="@color/white"
-        android:textSize="15sp"
+        android:textSize="20sp"
         android:layout_alignParentRight="true"
         android:layout_weight="0.25 "
         android:text="Mon"
         android:maxLength="3"/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="0.25">
-        <ImageView
-            android:id="@+id/weather_icon_adapter"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center|center_horizontal"
-
-            />
-    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -65,6 +53,18 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0.25">
+    <ImageView
+        android:id="@+id/weather_icon_adapter"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center|center_horizontal"
+
+        />
+</LinearLayout>
 
     <TextView
         android:layout_width="match_parent"

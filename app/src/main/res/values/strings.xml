@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">WeAppather</string>
+    <string name="this_week">This Week</string>
+    <string name="full_swipe_forecast">Swipe up for the weeks forecast</string>
+    <string name="today">Today</string>
+    <string name="loading">Loading...</string>
+    <string name="image_holder">image holder</string>
+    <string name="close_text">x</string>
 </resources>

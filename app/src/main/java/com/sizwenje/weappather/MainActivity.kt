@@ -2,11 +2,14 @@ package com.sizwenje.weappather
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -15,14 +18,23 @@ import android.util.Log
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.ListView
-import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.sizwenje.weappather.adapter.ForeCastAdapter
 import com.sizwenje.weappather.model.ForeCastModel
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_main.current_weather
+import kotlinx.android.synthetic.main.activity_main.date_weather
+import kotlinx.android.synthetic.main.activity_main.description_weather
+import kotlinx.android.synthetic.main.activity_main.humidity_weather
+import kotlinx.android.synthetic.main.activity_main.location_result
+import kotlinx.android.synthetic.main.activity_main.main_weather
+import kotlinx.android.synthetic.main.activity_main.min_weather
+import kotlinx.android.synthetic.main.activity_main.minmax_weather
+import kotlinx.android.synthetic.main.activity_main.weather_icon
+import kotlinx.android.synthetic.main.activity_main_night.*
 import okhttp3.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -34,19 +46,20 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-private  const val PERMISSION_REQUEST =10;
+private  const val PERMISSION_REQUEST =10
 
+@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
     lateinit var locationManager: LocationManager
     private var GPS = false
     private var Network = false
-    private  var GPSLocation :Location? = null
-    private  var NetworkLocation :Location? = null
+    private var GPSLocation :Location? = null
+    private var NetworkLocation :Location? = null
     private var currentLocation :String ="Location"
 
-    lateinit var listView_details: ListView
-    var arrayList_details:ArrayList<ForeCastModel> = ArrayList();
+    lateinit var listviewDetails: ListView
+    var arraylistDetails:ArrayList<ForeCastModel> = ArrayList();
 
 
 
@@ -59,20 +72,20 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_main_night)
         disableView()
 
-        listView_details = findViewById<ListView>(R.id.listView) as ListView
-
-
+        listviewDetails = findViewById<ListView>(R.id.listView) as ListView
+        //find the current screen size and use it to split screen for two sections (force main view t fill screen)
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displayMetrics)
 
-        var width = displayMetrics.widthPixels
-        var height = displayMetrics.heightPixels
+        val width = displayMetrics.widthPixels
+        val height = displayMetrics.heightPixels
 
         // Gets linearlayout
         val layout: LinearLayout = findViewById(R.id.mainblock)
+
         // Gets the layout params that will allow you to resize the layout
         val params: ViewGroup.LayoutParams = layout.layoutParams
         params.width = width
@@ -83,19 +96,24 @@ class MainActivity : AppCompatActivity() {
 
 
 
+        // Check for Internet Connection
+        if (isConnected()) {
+            //Check if current android sdk is greater than Marshmallow
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                //test is the user has given permission before of not
+                if (checkPermission(permissions)) {
+                    enableView()
+                } else {
+                    requestPermissions(permissions, PERMISSION_REQUEST)
+                }
 
-        //Check if current android sdk is greater than Marshmallow
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            //test is the user has given permission before of not
-            if(checkPermission(permissions)){
+            } else {
                 enableView()
-            }else{
-                requestPermissions(permissions, PERMISSION_REQUEST)
             }
-
-        }else{
-            enableView()
+            }else{
+            showInternetErrorBox()
         }
+
     }
 
     private fun disableView() {
@@ -109,7 +127,7 @@ class MainActivity : AppCompatActivity() {
        /* btn_get_location.isEnabled = true
         btn_get_location.alpha = 1F*/
         weather_icon.setOnClickListener{ getLocation()}
-        Toast.makeText(this, "Done Enable", Toast.LENGTH_SHORT).show()
+        //Toast.makeText(this, "Done Enable", Toast.LENGTH_SHORT).show()
     }
 
     @SuppressLint("MissingPermission")
@@ -128,15 +146,14 @@ class MainActivity : AppCompatActivity() {
                 Log.d("GPS Location: ", "Location collected from GPS")
 
 
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,20000,1F, object  :
+                //load new location every 30 seconds
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,30000,5F, object  :
                     LocationListener {
                     override fun onLocationChanged(p0: Location) {
-                        if(p0 != null){
-                            GPSLocation = p0
-                            Log.d("MainActivity","GPS Latitude: "+ GPSLocation!!.latitude)
-                            Log.d("MainActivity","GPS Longitude: "+ GPSLocation!!.longitude)
+                        GPSLocation = p0
+                        Log.d("MainActivity","GPS Latitude: "+ GPSLocation!!.latitude)
+                        Log.d("MainActivity","GPS Longitude: "+ GPSLocation!!.longitude)
 
-                        }
                     }
 
                     override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
@@ -162,12 +179,10 @@ class MainActivity : AppCompatActivity() {
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,5000,0F, object  :
                     LocationListener {
                     override fun onLocationChanged(p0: Location) {
-                        if(p0 != null){
-                            NetworkLocation = p0
-                            Log.d("MainActivity","Network Latitude: "+ NetworkLocation!!.latitude)
-                            Log.d("MainActivity","Network Longitude: "+ NetworkLocation!!.longitude)
+                        NetworkLocation = p0
+                        Log.d("MainActivity","Network Latitude: "+ NetworkLocation!!.latitude)
+                        Log.d("MainActivity","Network Longitude: "+ NetworkLocation!!.longitude)
 
-                        }
                     }
 
                     override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
@@ -187,8 +202,8 @@ class MainActivity : AppCompatActivity() {
 
             if(GPSLocation != null && NetworkLocation!= null){
 
-                var long: String
-                var lat: String
+                val long: String
+                val lat: String
                 if(GPSLocation!!.accuracy > NetworkLocation!!.accuracy){
                     /*location_result.append("\nNetwork")
                     location_result.append("\nLatitude: "+ NetworkLocation!!.latitude)
@@ -196,8 +211,8 @@ class MainActivity : AppCompatActivity() {
                     Log.d("MainActivity","Network Latitude: "+ NetworkLocation!!.latitude)
                     Log.d("MainActivity","Network Longitude: "+ NetworkLocation!!.longitude)
 
-                    long= NetworkLocation!!.longitude.toString();
-                    lat= NetworkLocation!!.latitude.toString();
+                    long= NetworkLocation!!.longitude.toString()
+                    lat= NetworkLocation!!.latitude.toString()
                 }else{
                    /* location_result.append("\nGPS")
                     location_result.append("\nLatitude: "+ GPSLocation!!.latitude)
@@ -205,16 +220,12 @@ class MainActivity : AppCompatActivity() {
                     Log.d("MainActivity","GPS Latitude: "+ GPSLocation!!.latitude)
                     Log.d("MainActivity","GPS Longitude: "+ GPSLocation!!.longitude)
 
-                    long= GPSLocation!!.longitude.toString();
-                    lat= GPSLocation!!.latitude.toString();
+                    long= GPSLocation!!.longitude.toString()
+                    lat= GPSLocation!!.latitude.toString()
                 }
 
                 //current weather
-                run("https://api.openweathermap.org/data/2.5/weather?lat="+lat+"&lon="+long +"&appid=b8851f820a63438538293c291ed5a270&units=metric")
-
-                //Forecast weather
-                //runforcast("https://api.openweathermap.org/data/2.5/forecast?lat="+lat+"&lon="+long +"&appid=b8851f820a63438538293c291ed5a270&units=metric&exclude=hourly")
-                runonecall("https://api.openweathermap.org/data/2.5/onecall?lat="+lat+"&lon="+long +"&appid=b8851f820a63438538293c291ed5a270&units=metric&exclude=hourly")
+                run("https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$long&appid=b8851f820a63438538293c291ed5a270&units=metric",long,lat)
             }
         }else{
             startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
@@ -222,38 +233,40 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    fun run(url: String) {
+    private fun run(url: String, long: String, lat :String) {
         val request = Request.Builder()
             .url(url)
             .build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
+
             }
 
             @RequiresApi(Build.VERSION_CODES.O)
             override fun onResponse(call: Call, response: Response) {
-                var str_response = response.body()!!.string()
-                //creating json object
-                val json_contact:JSONObject = JSONObject(str_response)
-                //creating json array
+                val strResponse = response.body()!!.string()
+                val jsonContact = JSONObject(strResponse)
 
-                var location : String = json_contact.getString("name")
+                val location : String = jsonContact.getString("name")
 
 
                 runOnUiThread {
 
-                    location_result.setText(location)
-                    currentLocation = location;
+                    location_result.text = location
+                    currentLocation = location
+
+                    //forecast weather
+                    runonecall("https://api.openweathermap.org/data/2.5/onecall?lat=$lat&lon=$long&appid=b8851f820a63438538293c291ed5a270&units=metric&exclude=hourly")
+
 
                 }
-                //progress.visibility = View.GONE
             }
         })
     }
 
 
-    fun runonecall(url: String) {
+    private fun runonecall(url: String) {
 
         val request = Request.Builder()
             .url(url)
@@ -261,63 +274,51 @@ class MainActivity : AppCompatActivity() {
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
+
             }
 
+            @SuppressLint("SetTextI18n")
             @RequiresApi(Build.VERSION_CODES.O)
             override fun onResponse(call: Call, response: Response) {
-                var str_response = response.body()!!.string()
+                val strResponse = response.body()!!.string()
                 //creating json object
-                val json_contact:JSONObject = JSONObject(str_response)
+                val jsonContact = JSONObject(strResponse)
+
                 //creating json array
-                var jsonarray_info:JSONArray= json_contact.getJSONArray("daily")
+                val jsonarrayInfo:JSONArray= jsonContact.getJSONArray("daily")
 
 
 
                 //init size and set default value for it
-                var i:Int = 0
-                var size:Int = jsonarray_info.length()
-                arrayList_details= ArrayList();
+                val size:Int = jsonarrayInfo.length()
+                arraylistDetails= ArrayList()
 
 
                 /**
                  * This is to load data in the top section of the application
                  */
 
-                var jsonarray_current:JSONObject= json_contact.getJSONObject("current")
 
-                //var json_object_weather:JSONObject=jsonarray_weather.getJSONObject(0)
-                //var json_object_main:JSONObject=jsonarray_main.getJSONObject(0)
+                val jsonarray_current:JSONObject= jsonContact.getJSONObject("current")
 
-                var temp: String = (roundTwoDecimals(jsonarray_current.getString("temp").toDouble())) + "\u00BA C";
-                var uvi: String = jsonarray_current.getString("uvi")
-                /*var temp_max: String = (roundTwoDecimals(jsonarray_current.getString("temp_max").toDouble())) + " \u00BA";
-                var pressure: String = jsonarray_current.getString("pressure");*/
-                var humidity: String = jsonarray_current.getString("humidity")+ "\uFE6A";
-
-                var wind: String = jsonarray_current.getString("wind_speed");
-                var direction: String = jsonarray_current.getString("wind_deg");
+                val temp: String = (roundTwoDecimals(jsonarray_current.getString("temp").toDouble())) + "\u00BA"
+                val uvi: String = jsonarray_current.getString("uvi")
+                val humidity: String = jsonarray_current.getString("humidity")+ "\uFE6A"
+                val wind: String = roundTwoDecimals(jsonarray_current.getString("wind_speed").toDouble())
+                val direction: String = jsonarray_current.getString("wind_deg")
 
 
-                //assign collected values to var
+                //assign collected values to val
 
 
                 //weather block
-                var jsonarray_weather:JSONArray= jsonarray_current.getJSONArray("weather")
-                var json_objectweather:JSONObject=jsonarray_weather.getJSONObject(0)
+                val jsonarray_weather:JSONArray= jsonarray_current.getJSONArray("weather")
+                val json_objectweather:JSONObject=jsonarray_weather.getJSONObject(0)
 
 
-                var icon = json_objectweather.getString("icon")
-                var main = json_objectweather.getString("main")
-                var description = json_objectweather.getString("description")
-
-                Log.v("weather section : ",json_objectweather.toString())
-                //var description: String = json_object_weather.getString("description")
-                //var icon: String = json_object_weather.getString("icon")
-
-                Log.v("Main section main", jsonarray_weather.toString())
-
-
-                //Log.v("temp", temp)
+                val icon = json_objectweather.getString("icon")
+                val main = json_objectweather.getString("main")
+                val description = json_objectweather.getString("description")
 
 
 
@@ -325,135 +326,99 @@ class MainActivity : AppCompatActivity() {
                  * Go through the list and then add rows to the bottom list row section
                  */
 
-                for (i in 0.. size-1) {
-                    var json_objectdetail:JSONObject=jsonarray_info.getJSONObject(i)
+                for (i in 1.. size-1) {
+                    val jsonObjectdetail:JSONObject=jsonarrayInfo.getJSONObject(i)
 
                     //create new model that will hold values
-                    var model:ForeCastModel= ForeCastModel();
+                    val model:ForeCastModel= ForeCastModel();
 
-                    Log.v("array pos :"+i.toString(), json_objectdetail.toString())
-
-
-                    //store values
-                    /*model.location =json_objectdetail.getString("name")*/
+                    //Log.v("array pos :$i", jsonObjectdetail.toString())
 
                     //weather block
-                    var jsonarray_weather:JSONArray= json_objectdetail.getJSONArray("weather")
-                    var json_objectweather:JSONObject=jsonarray_weather.getJSONObject(0)
+                    val jsonarrayWeather:JSONArray= jsonObjectdetail.getJSONArray("weather")
+                    val jsonObjectweather:JSONObject=jsonarrayWeather.getJSONObject(0)
 
 
-                    model.icon = json_objectweather.getString("icon")
-                    model.main = json_objectweather.getString("main")
-                    model.description = json_objectweather.getString("description")
+                    model.icon = jsonObjectweather.getString("icon")
+                    model.main = jsonObjectweather.getString("main")
+                    model.description = jsonObjectweather.getString("description")
 
-                    Log.v("weather section : ",json_objectweather.toString())
+                    Log.v("weather section : ",jsonObjectweather.toString())
 
-                    model.datestamp = Instant.ofEpochSecond(json_objectdetail.getString("dt").toLong())
-                        .atZone(ZoneId.systemDefault()).getDayOfWeek()
+                    model.datestamp = Instant.ofEpochSecond(jsonObjectdetail.getString("dt").toLong())
+                        .atZone(ZoneId.systemDefault()).dayOfWeek
                         .toString()
 
-                    model.pressure = json_objectdetail.getString("pressure")
-                    model.humidity = json_objectdetail.getString("humidity")+ "\uFE6A"
-                    model.wind = json_objectdetail.getString("wind_speed")
-                    model.direction = json_objectdetail.getString("wind_deg")
+                    model.pressure = jsonObjectdetail.getString("pressure")
+                    model.humidity = jsonObjectdetail.getString("humidity")+ "\uFE6A"
+                    model.wind = roundTwoDecimals(jsonObjectdetail.getString("wind_speed").toDouble())
+                    model.direction = jsonObjectdetail.getString("wind_deg")
 
 
-                    //model.main = json_objectweather.getString("main")
-                    //model.description = json_objectweather.getString("description")
 
                     //main block
-                    var jsonarray_main:JSONObject= json_objectdetail.getJSONObject("temp")
+                    val jsonarray_main:JSONObject= jsonObjectdetail.getJSONObject("temp")
 
-                    model.temp = roundTwoDecimals(jsonarray_main.getString("day").toDouble()) + "\u00BA C";
-                    model.temp_min = roundTwoDecimals(jsonarray_main.getString("min").toDouble())+ " \u00BA";
-                    model.temp_max = roundTwoDecimals(jsonarray_main.getString("max").toDouble())+ " \u00BA";
-
-
+                    model.temp = roundTwoDecimals(jsonarray_main.getString("day").toDouble()) + "\u00BA"
+                    model.temp_min = roundTwoDecimals(jsonarray_main.getString("min").toDouble())+ "\u00BA"
+                    model.temp_max = roundTwoDecimals(jsonarray_main.getString("max").toDouble())+ "\u00BA"
 
 
-
-
-                    //var jsonarray_wind:JSONObject= json_objectdetail.getJSONObject("wind")
-
-
-                    //var jsonarray_main:JSONArray= json_objectdetail.getJSONArray("main")
-                    //var json_objectmain:JSONObject=jsonarray_main.getJSONObject(0)
-
-
-                    /*model.temp = json_objectmain.getString("temp")
-                    model.temp_min = json_objectmain.getString("temp_min")
-                    model.temp_max = json_objectmain.getString("temp_max")
-                    model.pressure = json_objectmain.getString("pressure")
-                    model.humidity = json_objectmain.getString("humidity")*/
-
-                    //Log.v("Forecast temp: ",jsonarray_main.toString())
-
-                    //wind block
-                    /*var jsonarray_wind:JSONArray= json_objectdetail.getJSONArray("wind")
-                    var json_objectwind:JSONObject=jsonarray_wind.getJSONObject(0)
-
-                    model.wind = json_objectwind.getString("speed")
-                    model.direction = json_objectwind.getString("deg")*/
-
-
-
-                    arrayList_details.add(model)
+                    arraylistDetails.add(model)
                 }
 
                 runOnUiThread {
 
                     Picasso.with(baseContext)
-                        .load("https://openweathermap.org/img/wn/"+icon+"@4x.png")
+                        .load("https://openweathermap.org/img/wn/$icon@4x.png")
                         //.placeholder(R.drawable.wind)
                         .error(R.drawable.ic_launcher_foreground)//optional
                         .fit()       //optional
                         //.centerCrop()                        //optional
-                        .into(weather_icon);
+                        .into(weather_icon)
 
 
                     //attach collected variables to components
-                    main_weather.setText(main)
-                    description_weather.setText(description)
+                    main_weather.text = main
+                    description_weather.text = description
 
                     //location_result.setText(location)
 
 
                     //attach collected variables to components
-                    current_weather.setText(temp)
-                    minmax_weather.setText("UV "+uvi    )
-                    /*min_weather.setText(temp_min)
-                    max_weather.setText(temp_max)
-                    pressure_weather.setText(pressure)*/
-                    humidity_weather.setText(humidity)
+                    current_weather.text = temp
+                    current_weather1.text = temp
+                    minmax_weather.text = "UV $uvi"
+                    humidity_weather.text = humidity
 
                     val current = LocalDateTime.now()
 
-                    val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
+                    val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
                     val formatted = current.format(formatter)
 
-                    date_weather.setText(formatted)
+                    date_weather.text = formatted
 
-                    min_weather.setText(wind+direction(direction.toInt()))
+                    min_weather.text = wind+direction(direction.toInt())
 
                     //stuff that updates ui
                     val obj_adapter : ForeCastAdapter
-                    obj_adapter = ForeCastAdapter(applicationContext,arrayList_details)
-                    listView_details.adapter=obj_adapter
+                    obj_adapter = ForeCastAdapter(applicationContext,arraylistDetails)
+                    listviewDetails.adapter=obj_adapter
 
-                    listView_details.setOnItemClickListener { parent, view, position, id ->
+                    listviewDetails.setOnItemClickListener { parent, view, position, id ->
 
 
-                        Toast.makeText(this@MainActivity, "Item One: "+ arrayList_details.map { it.temp }[position].toString(),   Toast.LENGTH_SHORT).show()
+                        //Toast.makeText(this@MainActivity, "Item One: "+ arrayList_details.map { it.temp }[position].toString(),   Toast.LENGTH_SHORT).show()
 
                         IntentNewView(currentLocation,
-                            arrayList_details.map { it.description }[position].toString(),
-                            arrayList_details.map { it.temp }[position].toString(),
-                            arrayList_details.map { it.temp_min }[position].toString(),
-                            arrayList_details.map { it.temp_max }[position].toString(),
-                            arrayList_details.map { it.humidity }[position].toString(),
-                            arrayList_details.map { it.wind }[position].toString()+" "+direction(arrayList_details.map { it.direction }[position].toString().toInt()),
-                            arrayList_details.map { it.icon }[position].toString(),
-                            arrayList_details.map { it.datestamp }[position].toString())
+                            arraylistDetails.map { it.description }[position].toString(),
+                            arraylistDetails.map { it.temp }[position].toString(),
+                            arraylistDetails.map { it.temp_min }[position].toString(),
+                            arraylistDetails.map { it.temp_max }[position].toString(),
+                            arraylistDetails.map { it.humidity }[position].toString(),
+                            arraylistDetails.map { it.wind }[position].toString()+" "+direction(arraylistDetails.map { it.direction }[position].toString().toInt()),
+                            arraylistDetails.map { it.icon }[position].toString(),
+                            arraylistDetails.map { it.datestamp }[position].toString())
 
 
                     }
@@ -461,6 +426,44 @@ class MainActivity : AppCompatActivity() {
                     }
             }
         })
+    }
+
+    fun isConnected(): Boolean {
+        var connected = false
+        try {
+            val cm: ConnectivityManager =
+                applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val nInfo: NetworkInfo? = cm.getActiveNetworkInfo()
+            connected = nInfo != null && nInfo.isAvailable() && nInfo.isConnected()
+            return connected
+        } catch (e: Exception) {
+            Log.e("Connectivity Exception", e.message!!)
+        }
+        return connected
+    }
+
+    fun showInternetErrorBox(){
+        // Show Internet connection error if no internet connect was found
+        val dialogBuilder = AlertDialog.Builder(this)
+
+        // set message of alert dialog
+        dialogBuilder.setMessage("Please make sure your connected to the internet.")
+            .setCancelable(false)
+            .setPositiveButton("Retry", DialogInterface.OnClickListener {
+                    dialog, id ->
+
+                finish();
+                startActivity(getIntent());
+            })
+        // negative button text and action
+
+
+        // create dialog box
+         val alert = dialogBuilder.create()
+        // set title for alert dialog box
+        alert.setTitle("Internet connection failure")
+        // show alert dialog
+        alert.show()
     }
 
     fun IntentNewView(name:String,description:String,temp:String, mintemp:String,maxtemp:String,hum:String,wind:String,icon:String,day :String){
@@ -479,35 +482,45 @@ class MainActivity : AppCompatActivity() {
 
     //convert the direction to a co-ordinate
     fun direction(d: Int) :String{
-        var pos: String = "N"
+        var pos = "N"
 
 
-            if(d in 0.0..30.0) {
-                pos = "N"
-            }else if(d in 30.0..60.0) {
-                pos = "NE"
-            }else if(d in 60.0..120.0) {
-                pos = "E"
-            }else if(d in 120.0..150.0) {
-                pos = "SE"
-            }else if(d in 150.0..210.0) {
-                pos = "E"
-            }else if(d in 210.0..240.0) {
-                pos = "SW"
-            }else if(d in 240.0..300.0) {
-                pos = "W"
-            }else if(d in 300.0..330.0) {
-                pos = "NW"
-            }else if(d in 330.0..360.0) {
+        when (d) {
+            in 0.0..30.0 -> {
                 pos = "N"
             }
+            in 30.0..60.0 -> {
+                pos = "NE"
+            }
+            in 60.0..120.0 -> {
+                pos = "E"
+            }
+            in 120.0..150.0 -> {
+                pos = "SE"
+            }
+            in 150.0..210.0 -> {
+                pos = "E"
+            }
+            in 210.0..240.0 -> {
+                pos = "SW"
+            }
+            in 240.0..300.0 -> {
+                pos = "W"
+            }
+            in 300.0..330.0 -> {
+                pos = "NW"
+            }
+            in 330.0..360.0 -> {
+                pos = "N"
+            }
+        }
 
 
         return pos
     }
 
     fun roundTwoDecimals(d: Double): String {
-        val twoDForm = DecimalFormat("#.#")
+        val twoDForm = DecimalFormat("#")
         return twoDForm.format(d).toString()
     }
 

@@ -1,32 +1,31 @@
 package com.sizwenje.weappather
 
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.annotation.RequiresApi
-import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_main.current_weather
-import kotlinx.android.synthetic.main.activity_main.date_weather
-import kotlinx.android.synthetic.main.activity_main.description_weather
-import kotlinx.android.synthetic.main.activity_main.humidity_weather
-import kotlinx.android.synthetic.main.activity_main.location_result
-import kotlinx.android.synthetic.main.activity_main.main_weather
-import kotlinx.android.synthetic.main.activity_main.min_weather
-import kotlinx.android.synthetic.main.activity_main.minmax_weather
-import kotlinx.android.synthetic.main.activity_main.weather_icon
-import kotlinx.android.synthetic.main.activity_single_view.*
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
+import com.squareup.picasso.Picasso.*
+import kotlinx.android.synthetic.main.activity_single_view.current_weather
+import kotlinx.android.synthetic.main.activity_single_view.date_weather
+import kotlinx.android.synthetic.main.activity_single_view.description_weather
+import kotlinx.android.synthetic.main.activity_single_view.humidity_weather
+import kotlinx.android.synthetic.main.activity_single_view.location_result
+import kotlinx.android.synthetic.main.activity_single_view.main_weather
+import kotlinx.android.synthetic.main.activity_single_view.min_weather
+import kotlinx.android.synthetic.main.activity_single_view.weather_icon
+import kotlinx.android.synthetic.main.activity_single_view.close
+import kotlinx.android.synthetic.main.activity_single_view_night.*
 
 class SingleViewActivity : AppCompatActivity() {
+    @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_single_view)
+        setContentView(R.layout.activity_single_view_night)
 
-        val intent = getIntent();
+        //fetch code that was sent through intent and load it int variables
+        val intent = intent
         val name= intent.getStringExtra("name")
         val description = intent.getStringExtra("desc")
         val temp = intent.getStringExtra("temp")
@@ -37,38 +36,31 @@ class SingleViewActivity : AppCompatActivity() {
         val icon = intent.getStringExtra("icon")
         val day = intent.getStringExtra("day")
 
-        location_result.setText(name)
+        location_result.text = name
 
-        Picasso.with(baseContext)
-            .load("https://openweathermap.org/img/wn/"+icon+"@4x.png")
+        with(baseContext)
+            .load("https://openweathermap.org/img/wn/$icon@4x.png")
             //.placeholder(R.drawable.wind)
             .error(R.drawable.ic_launcher_foreground)//optional
             .fit()       //optional
             //.centerCrop()                        //optional
-            .into(weather_icon);
+            .into(weather_icon)
 
 
         //attach collected variables to components
-        main_weather.setText(temp)
-        description_weather.setText(description)
-
-        //location_result.setText(location)
+        main_weather.text = temp
+        description_weather.text = description
 
 
         //attach collected variables to components
-        current_weather.setText(temp)
-        minmax_weather.setText(mintemp+" | "+maxtemp   )
-        /*min_weather.setText(temp_min)
-        max_weather.setText(temp_max)
-        pressure_weather.setText(pressure)*/
-        humidity_weather.setText(hum)
+        current_weather.text = temp
+        min_weather.text = mintemp
+        max_weather.text = maxtemp+"\t\t"
+        humidity_weather.text = hum
+        date_weather.text = "$day midday"
+        wind_weather.text = wind
 
-
-
-        date_weather.setText(day)
-
-        min_weather.setText(wind)
-
+        //close the current view and show the latest view
         close.setOnClickListener{
             finish()
         }

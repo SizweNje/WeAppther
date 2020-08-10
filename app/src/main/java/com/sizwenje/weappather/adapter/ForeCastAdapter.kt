@@ -51,8 +51,8 @@ class ForeCastAdapter(context: Context,arrayListDetails:ArrayList<ForeCastModel>
         }
 
         listRowHolder.datestamp.text = arrayListDetails.get(position).datestamp
-        listRowHolder.day_adapter.text = arrayListDetails.get(position).temp
-        listRowHolder.min_max_adapter.text = arrayListDetails.get(position).temp_min+" | "+arrayListDetails.get(position).temp_max
+        listRowHolder.min_adapter.text = arrayListDetails.get(position).temp_min
+        listRowHolder.max_adapter.text = arrayListDetails.get(position).temp_max
         listRowHolder.description_adapter.text = arrayListDetails.get(position).description
 
         if (view != null) {
@@ -65,8 +65,6 @@ class ForeCastAdapter(context: Context,arrayListDetails:ArrayList<ForeCastModel>
                 .into(listRowHolder.weather_icon_adapter)
         };
 
-        Log.v("image link: ","https://openweathermap.org/img/wn/"+arrayListDetails.get(position).icon+"@4x.png")
-
 
 
 
@@ -75,17 +73,19 @@ class ForeCastAdapter(context: Context,arrayListDetails:ArrayList<ForeCastModel>
 }
 
 private class ListRowHolder(row: View?) {
-    public val day_adapter: TextView
+    //public val day_adapter: TextView
     public val datestamp : TextView
-    public val min_max_adapter: TextView
+    public val min_adapter: TextView
+    public val max_adapter: TextView
     public val description_adapter: TextView
     public val weather_icon_adapter : ImageView
     public val linearLayout: LinearLayout
 
     init {
-        this.day_adapter = row?.findViewById<TextView>(R.id.day_adapter) as TextView
+        //this.day_adapter = row?.findViewById<TextView>(R.id.day_adapter) as TextView
         this.datestamp = row?.findViewById<TextView>(R.id.datestamp) as TextView
-        this.min_max_adapter = row?.findViewById<TextView>(R.id.min_max_adapter) as TextView
+        this.min_adapter = row?.findViewById<TextView>(R.id.min_adapter) as TextView
+        this.max_adapter = row?.findViewById<TextView>(R.id.max_adapter) as TextView
         this.description_adapter = row?.findViewById<TextView>(R.id.description_adapter) as TextView
         this.weather_icon_adapter = row?.findViewById<ImageView>(R.id.weather_icon_adapter) as ImageView
         this.linearLayout = row?.findViewById<LinearLayout>(R.id.linearLayout) as LinearLayout
