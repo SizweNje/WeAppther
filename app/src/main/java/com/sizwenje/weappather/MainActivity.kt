@@ -433,7 +433,53 @@ class MainActivity : AppCompatActivity() {
                 var size:Int = jsonarray_info.length()
                 arrayList_details= ArrayList();
 
-                //go through the list and then add rows
+
+                /**
+                 * This is to load data in the top section of the application
+                 */
+
+                var jsonarray_current:JSONObject= json_contact.getJSONObject("current")
+
+                //var json_object_weather:JSONObject=jsonarray_weather.getJSONObject(0)
+                //var json_object_main:JSONObject=jsonarray_main.getJSONObject(0)
+
+                var temp: String = (roundTwoDecimals(jsonarray_current.getString("temp").toDouble())) + "\u00BA C";
+                /*var temp_min: String = (roundTwoDecimals(jsonarray_current.getString("temp_min").toDouble())) + " \u00BA";
+                var temp_max: String = (roundTwoDecimals(jsonarray_current.getString("temp_max").toDouble())) + " \u00BA";
+                var pressure: String = jsonarray_current.getString("pressure");*/
+                var humidity: String = jsonarray_current.getString("humidity")+ "\uFE6A";
+
+                var wind: String = jsonarray_current.getString("wind_speed");
+                var direction: String = jsonarray_current.getString("wind_deg");
+
+
+                //assign collected values to var
+
+
+                //weather block
+                var jsonarray_weather:JSONArray= jsonarray_current.getJSONArray("weather")
+                var json_objectweather:JSONObject=jsonarray_weather.getJSONObject(0)
+
+
+                var icon = json_objectweather.getString("icon")
+                var main = json_objectweather.getString("main")
+                var description = json_objectweather.getString("description")
+
+                Log.v("weather section : ",json_objectweather.toString())
+                //var description: String = json_object_weather.getString("description")
+                //var icon: String = json_object_weather.getString("icon")
+
+                Log.v("Main section main", jsonarray_weather.toString())
+
+
+                //Log.v("temp", temp)
+
+
+
+                /**
+                 * Go through the list and then add rows to the bottom list row section
+                 */
+
                 for (i in 0.. size-1) {
                     var json_objectdetail:JSONObject=jsonarray_info.getJSONObject(i)
 
@@ -510,6 +556,40 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 runOnUiThread {
+
+                    Picasso.with(baseContext)
+                        .load("https://openweathermap.org/img/wn/"+icon+"@4x.png")
+                        //.placeholder(R.drawable.wind)
+                        .error(R.drawable.ic_launcher_foreground)//optional
+                        .fit()       //optional
+                        //.centerCrop()                        //optional
+                        .into(weather_icon);
+
+
+                    //attach collected variables to components
+                    main_weather.setText(main)
+                    description_weather.setText(description)
+
+                    //location_result.setText(location)
+
+
+                    //attach collected variables to components
+                    current_weather.setText(temp)
+                    /*minmax_weather.setText(temp_min+" | "+temp_max)
+                    min_weather.setText(temp_min)
+                    max_weather.setText(temp_max)
+                    pressure_weather.setText(pressure)*/
+                    humidity_weather.setText(humidity)
+
+                    val current = LocalDateTime.now()
+
+                    val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
+                    val formatted = current.format(formatter)
+
+                    date_weather.setText(formatted)
+
+                    min_weather.setText(wind+direction(direction.toInt()))
+
                     //stuff that updates ui
                     val obj_adapter : ForeCastAdapter
                     obj_adapter = ForeCastAdapter(applicationContext,arrayList_details)
