@@ -289,8 +289,6 @@ class MainActivityc : AppCompatActivity() {
                     current_weather.setText(temp)
                     minmax_weather.setText(temp_min+" | "+temp_max)
                     min_weather.setText(temp_min)
-                    max_weather.setText(temp_max)
-                    pressure_weather.setText(pressure)
                     humidity_weather.setText(humidity)
 
                     val current = LocalDateTime.now()

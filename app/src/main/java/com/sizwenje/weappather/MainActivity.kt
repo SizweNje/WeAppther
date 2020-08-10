@@ -209,7 +209,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 //current weather
-                //run("https://api.openweathermap.org/data/2.5/weather?lat="+lat+"&lon="+long +"&appid=b8851f820a63438538293c291ed5a270&units=metric")
+                run("https://api.openweathermap.org/data/2.5/weather?lat="+lat+"&lon="+long +"&appid=b8851f820a63438538293c291ed5a270&units=metric")
 
                 //Forecast weather
                 //runforcast("https://api.openweathermap.org/data/2.5/forecast?lat="+lat+"&lon="+long +"&appid=b8851f820a63438538293c291ed5a270&units=metric&exclude=hourly")
@@ -236,74 +236,13 @@ class MainActivity : AppCompatActivity() {
                 //creating json object
                 val json_contact:JSONObject = JSONObject(str_response)
                 //creating json array
-                var jsonarray_weather:JSONArray= json_contact.getJSONArray("weather")
-                var jsonarray_main:JSONObject= json_contact.getJSONObject("main")
-                var jsonarray_wind:JSONObject= json_contact.getJSONObject("wind")
+
                 var location : String = json_contact.getString("name")
 
-                var json_object_weather:JSONObject=jsonarray_weather.getJSONObject(0)
-                //var json_object_main:JSONObject=jsonarray_main.getJSONObject(0)
 
-                //assign collected values to var
-                var main: String = json_object_weather.getString("main")
-                var description: String = json_object_weather.getString("description")
-                var icon: String = json_object_weather.getString("icon")
-
-
-                var temp: String = (roundTwoDecimals(jsonarray_main.getString("temp").toDouble())) + "\u00BA C";
-                var temp_min: String = (roundTwoDecimals(jsonarray_main.getString("temp_min").toDouble())) + " \u00BA";
-                var temp_max: String = (roundTwoDecimals(jsonarray_main.getString("temp_max").toDouble())) + " \u00BA";
-                var pressure: String = jsonarray_main.getString("pressure");
-                var humidity: String = jsonarray_main.getString("humidity")+ "\uFE6A";
-
-                var wind: String = jsonarray_wind.getString("speed");
-                var direction: String = jsonarray_wind.getString("deg");
-
-                Log.v("temp", temp)
-
-
-
-                Log.v("MainWeather", json_object_weather.toString());
-                //Log.v("MainWeather", json_object_main.toString());
-                Log.v("MainWeather",jsonarray_main.toString())
                 runOnUiThread {
-                    /*/stuff that updates ui
-                    val obj_adapter : CustomAdapter
-                    obj_adapter = CustomAdapter(applicationContext,arrayList_details)
-                    listView_details.adapter=obj_adapter*/
-
-                    Picasso.with(baseContext)
-                        .load("https://openweathermap.org/img/wn/"+icon+"@4x.png")
-                        //.placeholder(R.drawable.wind)
-                        .error(R.drawable.ic_launcher_foreground)//optional
-                        .fit()       //optional
-                        //.centerCrop()                        //optional
-                        .into(weather_icon);
-
-
-                    //attach collected variables to components
-                    main_weather.setText(main)
-                    description_weather.setText(description)
 
                     location_result.setText(location)
-
-
-                    //attach collected variables to components
-                    current_weather.setText(temp)
-                    minmax_weather.setText(temp_min+" | "+temp_max)
-                    min_weather.setText(temp_min)
-                    max_weather.setText(temp_max)
-                    pressure_weather.setText(pressure)
-                    humidity_weather.setText(humidity)
-
-                    val current = LocalDateTime.now()
-
-                    val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
-                    val formatted = current.format(formatter)
-
-                    date_weather.setText(formatted)
-
-                    min_weather.setText(wind+direction(direction.toInt()))
 
                 }
                 //progress.visibility = View.GONE
@@ -403,6 +342,8 @@ class MainActivity : AppCompatActivity() {
                     val obj_adapter : ForeCastAdapter
                     obj_adapter = ForeCastAdapter(applicationContext,arrayList_details)
                     listView_details.adapter=obj_adapter
+
+
                 }
             }
         })
@@ -444,8 +385,8 @@ class MainActivity : AppCompatActivity() {
                 //var json_object_main:JSONObject=jsonarray_main.getJSONObject(0)
 
                 var temp: String = (roundTwoDecimals(jsonarray_current.getString("temp").toDouble())) + "\u00BA C";
-                /*var temp_min: String = (roundTwoDecimals(jsonarray_current.getString("temp_min").toDouble())) + " \u00BA";
-                var temp_max: String = (roundTwoDecimals(jsonarray_current.getString("temp_max").toDouble())) + " \u00BA";
+                var uvi: String = jsonarray_current.getString("uvi")
+                /*var temp_max: String = (roundTwoDecimals(jsonarray_current.getString("temp_max").toDouble())) + " \u00BA";
                 var pressure: String = jsonarray_current.getString("pressure");*/
                 var humidity: String = jsonarray_current.getString("humidity")+ "\uFE6A";
 
@@ -575,8 +516,8 @@ class MainActivity : AppCompatActivity() {
 
                     //attach collected variables to components
                     current_weather.setText(temp)
-                    /*minmax_weather.setText(temp_min+" | "+temp_max)
-                    min_weather.setText(temp_min)
+                    minmax_weather.setText("UV "+uvi    )
+                    /*min_weather.setText(temp_min)
                     max_weather.setText(temp_max)
                     pressure_weather.setText(pressure)*/
                     humidity_weather.setText(humidity)

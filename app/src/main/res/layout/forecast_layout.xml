@@ -23,7 +23,7 @@
             android:id="@+id/datestamp"
             android:layout_margin="5dp"
             android:textColor="@color/white"
-            android:textSize="16dp"
+            android:textSize="12dp"
             android:layout_alignParentRight="true"/>
 
         <LinearLayout
