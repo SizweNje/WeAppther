@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     private var Network = false
     private  var GPSLocation :Location? = null
     private  var NetworkLocation :Location? = null
+    private var currentLocation :String ="Location"
 
     lateinit var listView_details: ListView
     var arrayList_details:ArrayList<ForeCastModel> = ArrayList();
@@ -243,6 +244,7 @@ class MainActivity : AppCompatActivity() {
                 runOnUiThread {
 
                     location_result.setText(location)
+                    currentLocation = location;
 
                 }
                 //progress.visibility = View.GONE
@@ -250,104 +252,6 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    fun runforcast(url: String) {
-
-        val request = Request.Builder()
-            .url(url)
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-            }
-
-            @RequiresApi(Build.VERSION_CODES.O)
-            override fun onResponse(call: Call, response: Response) {
-                var str_response = response.body()!!.string()
-                //creating json object
-                val json_contact:JSONObject = JSONObject(str_response)
-                //creating json array
-                var jsonarray_info:JSONArray= json_contact.getJSONArray("list")
-
-
-
-                //init size and set default value for it
-                var i:Int = 0
-                var size:Int = jsonarray_info.length()
-                arrayList_details= ArrayList();
-
-                //go through the list and then add rows
-                for (i in 0.. size-1) {
-                    var json_objectdetail:JSONObject=jsonarray_info.getJSONObject(i)
-
-                    //create new model that will hold values
-                    var model:ForeCastModel= ForeCastModel();
-
-                    Log.v("array pos :"+i.toString(), json_objectdetail.toString())
-
-
-                    //store values
-                    /*model.location =json_objectdetail.getString("name")*/
-
-                    //weather block
-                    var jsonarray_weather:JSONArray= json_objectdetail.getJSONArray("weather")
-                    var json_objectweather:JSONObject=jsonarray_weather.getJSONObject(0)
-
-                    model.datestamp = json_objectdetail.getString("dt_txt")
-
-                    model.main = json_objectweather.getString("main")
-                    model.description = json_objectweather.getString("description")
-
-                    //main block
-                    var jsonarray_main:JSONObject= json_objectdetail.getJSONObject("main")
-
-                    model.temp = roundTwoDecimals(jsonarray_main.getString("temp").toDouble()) + "\u00BA C";
-                    model.temp_min = roundTwoDecimals(jsonarray_main.getString("temp_min").toDouble())+ " \u00BA";
-                    model.temp_max = roundTwoDecimals(jsonarray_main.getString("temp_max").toDouble())+ " \u00BA";
-                    model.pressure = jsonarray_main.getString("pressure")
-                    model.humidity = jsonarray_main.getString("humidity")
-
-
-
-
-
-                    var jsonarray_wind:JSONObject= json_objectdetail.getJSONObject("wind")
-
-
-                    //var jsonarray_main:JSONArray= json_objectdetail.getJSONArray("main")
-                    //var json_objectmain:JSONObject=jsonarray_main.getJSONObject(0)
-
-
-                    /*model.temp = json_objectmain.getString("temp")
-                    model.temp_min = json_objectmain.getString("temp_min")
-                    model.temp_max = json_objectmain.getString("temp_max")
-                    model.pressure = json_objectmain.getString("pressure")
-                    model.humidity = json_objectmain.getString("humidity")*/
-
-                    //Log.v("Forecast temp: ",jsonarray_main.toString())
-
-                    //wind block
-                    /*var jsonarray_wind:JSONArray= json_objectdetail.getJSONArray("wind")
-                    var json_objectwind:JSONObject=jsonarray_wind.getJSONObject(0)
-
-                    model.wind = json_objectwind.getString("speed")
-                    model.direction = json_objectwind.getString("deg")*/
-
-
-
-                    arrayList_details.add(model)
-                }
-
-                runOnUiThread {
-                    //stuff that updates ui
-                    val obj_adapter : ForeCastAdapter
-                    obj_adapter = ForeCastAdapter(applicationContext,arrayList_details)
-                    listView_details.adapter=obj_adapter
-
-
-                }
-            }
-        })
-    }
 
     fun runonecall(url: String) {
 
@@ -449,7 +353,7 @@ class MainActivity : AppCompatActivity() {
                         .toString()
 
                     model.pressure = json_objectdetail.getString("pressure")
-                    model.humidity = json_objectdetail.getString("humidity")
+                    model.humidity = json_objectdetail.getString("humidity")+ "\uFE6A"
                     model.wind = json_objectdetail.getString("wind_speed")
                     model.direction = json_objectdetail.getString("wind_deg")
 
@@ -535,9 +439,42 @@ class MainActivity : AppCompatActivity() {
                     val obj_adapter : ForeCastAdapter
                     obj_adapter = ForeCastAdapter(applicationContext,arrayList_details)
                     listView_details.adapter=obj_adapter
-                }
+
+                    listView_details.setOnItemClickListener { parent, view, position, id ->
+
+
+                        Toast.makeText(this@MainActivity, "Item One: "+ arrayList_details.map { it.temp }[position].toString(),   Toast.LENGTH_SHORT).show()
+
+                        IntentNewView(currentLocation,
+                            arrayList_details.map { it.description }[position].toString(),
+                            arrayList_details.map { it.temp }[position].toString(),
+                            arrayList_details.map { it.temp_min }[position].toString(),
+                            arrayList_details.map { it.temp_max }[position].toString(),
+                            arrayList_details.map { it.humidity }[position].toString(),
+                            arrayList_details.map { it.wind }[position].toString()+" "+direction(arrayList_details.map { it.direction }[position].toString().toInt()),
+                            arrayList_details.map { it.icon }[position].toString(),
+                            arrayList_details.map { it.datestamp }[position].toString())
+
+
+                    }
+
+                    }
             }
         })
+    }
+
+    fun IntentNewView(name:String,description:String,temp:String, mintemp:String,maxtemp:String,hum:String,wind:String,icon:String,day :String){
+        val intent = Intent(this, SingleViewActivity::class.java)
+        intent.putExtra("name", name)
+        intent.putExtra("desc", description)
+        intent.putExtra("temp", temp)
+        intent.putExtra("mintemp", mintemp)
+        intent.putExtra("maxtemp", maxtemp)
+        intent.putExtra("hum", hum)
+        intent.putExtra("wind", wind)
+        intent.putExtra("icon",icon)
+        intent.putExtra("day",day)
+        startActivity(intent)
     }
 
     //convert the direction to a co-ordinate

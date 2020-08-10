@@ -39,6 +39,8 @@ class ForeCastAdapter(context: Context,arrayListDetails:ArrayList<ForeCastModel>
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View? {
         val view: View?
         val listRowHolder: ListRowHolder
+
+
         if (convertView == null) {
             view = this.layoutInflater.inflate(R.layout.forecast_layout, parent, false)
             listRowHolder = ListRowHolder(view)
