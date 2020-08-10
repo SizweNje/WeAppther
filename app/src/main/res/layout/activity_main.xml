@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fillViewport="false"
+        android:background="@drawable/bg_night">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_marginTop="20dp">
+
+
+    <LinearLayout
+        android:id="@+id/mainblock"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_marginTop="20dp"
+        android:weightSum="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="0.8">
+        <TextView
+            android:id="@+id/location_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@color/white"
+            android:textAlignment="center"
+            android:gravity="center_horizontal"
+            android:text="Location"
+            android:textAllCaps="true"
+            android:textSize="40dp"
+            android:layout_marginTop="50dp"
+
+            />
+
+        <TextView
+            android:id="@+id/description_weather"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textAlignment="center"
+            android:gravity="center_horizontal"
+            android:text="Description"
+            android:textAllCaps="true"
+            android:textSize="20dp"/>
+
+        <TextView
+            android:id="@+id/date_weather"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textAlignment="center"
+            android:gravity="center_horizontal"
+            android:text="Date"
+            android:textAllCaps="true"
+            android:textSize="13dp"/>
+
+        <ImageView
+            android:id="@+id/weather_icon"
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"/>
+
+        <TextView
+            android:id="@+id/minmax_weather"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textAlignment="center"
+            android:gravity="center_horizontal"
+            android:text="50"
+            android:textAllCaps="true"
+            android:textSize="20dp"/>
+
+        <TextView
+            android:id="@+id/current_weather"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textAlignment="center"
+            android:gravity="center_horizontal"
+            android:text="50"
+            android:textAllCaps="true"
+            android:textSize="60dp"/>
+
+
+
+        <TextView
+            android:id="@+id/main_weather"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textAlignment="center"
+            android:gravity="center_horizontal"
+            android:text="dscsdfd"
+            android:textAllCaps="true"
+            android:textSize="15dp"
+            android:visibility="invisible"/>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="1"
+            android:layout_margin="5dp"
+            android:layout_weight="0.2"
+            >
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.25"
+                android:orientation="vertical"
+                android:textAlignment="center"
+                android:gravity="center_horizontal"
+                >
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/wind"
+                    android:layout_marginBottom="10dp"/>
+
+                <TextView
+                    android:id="@+id/min_weather"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="30"
+                    android:textSize="25dp"
+                    android:textColor="@color/white"
+                    android:textAllCaps="true"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.25"
+                android:orientation="vertical"
+                android:textAlignment="center"
+                android:gravity="center_horizontal"
+                android:visibility="invisible">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Max"
+                    android:textSize="17dp"
+                    android:textColor="@color/white"
+                    android:textAllCaps="true"/>
+                <TextView
+                    android:id="@+id/max_weather"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="35"
+                    android:textSize="40dp"
+                    android:textAllCaps="true"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.25"
+                android:orientation="vertical"
+                android:textAlignment="center"
+                android:gravity="center_horizontal"
+                android:visibility="invisible">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pre"
+                    android:textSize="17dp"
+                    android:textAllCaps="true"
+                    android:textColor="@color/white"/>
+                <TextView
+                    android:id="@+id/pressure_weather"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="10"
+                    android:textSize="40dp"
+                    android:textAllCaps="true"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.25"
+                android:orientation="vertical"
+                android:textAlignment="center"
+                android:gravity="center_horizontal">
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/wet"
+                    android:layout_marginBottom="10dp"/>
+                <TextView
+                    android:id="@+id/humidity_weather"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="100"
+                    android:textSize="25dp"
+                    android:textAllCaps="true"
+                    android:textColor="@color/white"/>
+            </LinearLayout>
+        </LinearLayout>
+        </LinearLayout>
+
+
+
+        <ListView
+            android:id="@+id/listView"
+            android:layout_width="match_parent"
+            android:layout_height="860dp">
+
+        </ListView>
+
+
+    </LinearLayout>
+    </ScrollView>
+
+
+
