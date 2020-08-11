@@ -1,4 +1,4 @@
-# WeAppther
+# WeAppther - Android
 
 If you would like also to view or recreate the application using swift, I have mentioned the link bellow:
 https://github.com/SizweNje/WeAppther_IOS
